@@ -5,7 +5,7 @@ import (
 	"newsportal/internal/repo/gormdb"
 )
 
-type TagDTO struct {
+type Tag struct {
 	ID    int32  `json:"id"`
 	Title string `json:"title"`
 }
@@ -14,7 +14,7 @@ type TagFilter struct {
 	StatusID int32
 }
 
-func (s *NewsPortal) GetTagsByFilter(ctx context.Context, filter TagFilter) ([]*TagDTO, error) {
+func (s *NewsPortal) GetTagsByFilter(ctx context.Context, filter TagFilter) ([]*Tag, error) {
 	s.log.Info("Получение тегов по фильтру", "filter", filter)
 
 	// Установка дефолтных значений для фильтров, если не заданы
@@ -30,9 +30,9 @@ func (s *NewsPortal) GetTagsByFilter(ctx context.Context, filter TagFilter) ([]*
 		return nil, err
 	}
 
-	var tagDTOs []*TagDTO
+	var tagDTOs []*Tag
 	for _, tag := range tags {
-		tagDTOs = append(tagDTOs, &TagDTO{
+		tagDTOs = append(tagDTOs, &Tag{
 			ID:    tag.TagID,
 			Title: tag.Title,
 		})
