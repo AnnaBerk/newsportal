@@ -3,10 +3,11 @@ package gormdb
 import (
 	"context"
 	"errors"
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 	"log"
-	"newsportal/dao/model"
-	"newsportal/internal/repo"
+	"newsportal/internal/repo/model"
+	"time"
 )
 
 type NewsRepo struct {
@@ -17,7 +18,26 @@ func NewNewsRepo(db *gorm.DB) *NewsRepo {
 	return &NewsRepo{db: db}
 }
 
-func (r *NewsRepo) GetNewsByFilters(ctx context.Context, filter repo.NewsFilter) ([]repo.NewsWithCategories, error) {
+type NewsFilter struct {
+	CategoryID int32
+	TagID      int32
+	StatusID   int32
+	Limit      int
+	Offset     int
+}
+
+type NewsWithCategories struct {
+	NewsID          int32         `gorm:"column:newsId"`
+	Title           string        `gorm:"column:title"`
+	Foreword        string        `gorm:"column:foreword"`
+	Content         string        `gorm:"column:content"`
+	PublicationDate time.Time     `gorm:"column:publicationDate"`
+	CategoryID      int32         `gorm:"column:categoryId"`
+	TagIds          pq.Int32Array `gorm:"column:tagIds"`
+	CategoryTitle   string        `gorm:"column:category_title"`
+}
+
+func (r *NewsRepo) GetNewsByFilters(ctx context.Context, filter NewsFilter) ([]NewsWithCategories, error) {
 	newsQuery := r.db.WithContext(ctx).
 		Model(&model.News{}).
 		Select(`news.*, categories.title AS category_title`).
@@ -36,7 +56,7 @@ func (r *NewsRepo) GetNewsByFilters(ctx context.Context, filter repo.NewsFilter)
 	newsQuery = newsQuery.Offset((filter.Offset - 1) * filter.Limit).Limit(filter.Limit)
 	newsQuery = newsQuery.Order(`news."publicationDate" DESC, news."newsId" DESC`)
 
-	var news []repo.NewsWithCategories
+	var news []NewsWithCategories
 	if err := newsQuery.Find(&news).Error; err != nil {
 		log.Printf("Ошибка при получении новостей: %v", err)
 		return nil, err
@@ -45,7 +65,7 @@ func (r *NewsRepo) GetNewsByFilters(ctx context.Context, filter repo.NewsFilter)
 	return news, nil
 }
 
-func (r *NewsRepo) CountNewsByFilters(ctx context.Context, filter repo.NewsFilter) (int64, error) {
+func (r *NewsRepo) CountNewsByFilters(ctx context.Context, filter NewsFilter) (int64, error) {
 	var count int64
 	newsQuery := r.db.WithContext(ctx).Model(&model.News{})
 
@@ -66,8 +86,8 @@ func (r *NewsRepo) CountNewsByFilters(ctx context.Context, filter repo.NewsFilte
 	return count, nil
 }
 
-func (r *NewsRepo) GetNewsByID(ctx context.Context, id int32) (*repo.NewsWithCategories, error) {
-	var newsWithCategories repo.NewsWithCategories
+func (r *NewsRepo) GetNewsByID(ctx context.Context, id int32) (*NewsWithCategories, error) {
+	var newsWithCategories NewsWithCategories
 
 	err := r.db.WithContext(ctx).
 		Model(&model.News{}).

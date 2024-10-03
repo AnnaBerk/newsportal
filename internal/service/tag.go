@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"newsportal/internal/repo"
+	"newsportal/internal/repo/gormdb"
 )
 
 type TagDTO struct {
@@ -22,7 +22,7 @@ func (s *NewsPortal) GetTagsByFilter(ctx context.Context, filter TagFilter) ([]*
 	//	filter.StatusID = 1
 	//}
 
-	tags, err := s.TagRepo.GetTagsByFilter(ctx, repo.TagFilter{
+	tags, err := s.TagRepo.GetTagsByFilter(ctx, gormdb.TagFilter{
 		StatusID: filter.StatusID,
 	})
 	if err != nil {

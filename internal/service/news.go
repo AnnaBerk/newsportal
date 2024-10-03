@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"newsportal/internal/repo"
+	"newsportal/internal/repo/gormdb"
 	"slices"
 )
 
@@ -13,7 +14,7 @@ type NewsFilter struct {
 	TagID      int32
 }
 
-type NewsShortDTO struct {
+type ShortNews struct {
 	ID              int32    `json:"id"`
 	Title           string   `json:"title"`
 	Foreword        string   `json:"foreword"`
@@ -22,7 +23,7 @@ type NewsShortDTO struct {
 	PublicationDate string   `json:"publicationDate"`
 }
 
-type NewsFullDTO struct {
+type FullNews struct {
 	ID              int32    `json:"id"`
 	Title           string   `json:"title"`
 	Foreword        string   `json:"foreword"`
@@ -37,10 +38,10 @@ func uniqueInt32Slice(input []int32) []int32 {
 	return slices.Compact(input)
 }
 
-func (s *NewsPortal) GetNewsByFilter(ctx context.Context, filter NewsFilter) ([]*NewsShortDTO, error) {
+func (s *NewsPortal) GetNewsByFilter(ctx context.Context, filter NewsFilter) ([]*ShortNews, error) {
 	s.log.Info("Получение новостей по фильтру", "filter", filter)
 
-	news, err := s.NewsRepo.GetNewsByFilters(ctx, repo.NewsFilter{
+	news, err := s.NewsRepo.GetNewsByFilters(ctx, gormdb.NewsFilter{
 		Offset:     filter.Page,
 		Limit:      filter.PageSize,
 		CategoryID: filter.CategoryID,
@@ -65,7 +66,7 @@ func (s *NewsPortal) GetNewsByFilter(ctx context.Context, filter NewsFilter) ([]
 		return nil, err
 	}
 
-	var newsDTOs []*NewsShortDTO
+	var newsDTOs []*ShortNews
 	for _, n := range news {
 		var tagNames []string
 		for _, tagID := range n.TagIds {
@@ -74,7 +75,7 @@ func (s *NewsPortal) GetNewsByFilter(ctx context.Context, filter NewsFilter) ([]
 			}
 		}
 
-		newsDTOs = append(newsDTOs, &NewsShortDTO{
+		newsDTOs = append(newsDTOs, &ShortNews{
 			ID:              n.NewsID,
 			Title:           n.Title,
 			Foreword:        n.Foreword,
@@ -90,7 +91,7 @@ func (s *NewsPortal) GetNewsByFilter(ctx context.Context, filter NewsFilter) ([]
 func (s *NewsPortal) GetNewsCountByFilter(ctx context.Context, filter NewsFilter) (int64, error) {
 	s.log.Info("Подсчет новостей по фильтру", "filter", filter)
 
-	count, err := s.NewsRepo.CountNewsByFilters(ctx, repo.NewsFilter{
+	count, err := s.NewsRepo.CountNewsByFilters(ctx, gormdb.NewsFilter{
 		CategoryID: filter.CategoryID,
 		TagID:      filter.TagID,
 	})
@@ -101,7 +102,7 @@ func (s *NewsPortal) GetNewsCountByFilter(ctx context.Context, filter NewsFilter
 	return count, nil
 }
 
-func (s *NewsPortal) GetNewsByID(ctx context.Context, id int32) (*NewsFullDTO, error) {
+func (s *NewsPortal) GetNewsByID(ctx context.Context, id int32) (*FullNews, error) {
 	s.log.Info("Получение новости по ID", "id", id)
 
 	news, err := s.NewsRepo.GetNewsByID(ctx, id)
@@ -132,7 +133,7 @@ func (s *NewsPortal) GetNewsByID(ctx context.Context, id int32) (*NewsFullDTO, e
 		}
 	}
 
-	newsDTO := &NewsFullDTO{
+	newsDTO := &FullNews{
 		ID:              news.NewsID,
 		Title:           news.Title,
 		Foreword:        news.Foreword,

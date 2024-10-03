@@ -5,9 +5,8 @@ import (
 	"gorm.io/gen/field"
 	"gorm.io/gorm"
 	"log"
-	"newsportal/dao/model"
-	"newsportal/dao/query"
-	"newsportal/internal/repo"
+	"newsportal/internal/repo/model"
+	"newsportal/internal/repo/query"
 )
 
 type TagRepo struct {
@@ -18,7 +17,11 @@ func NewTagRepo(db *gorm.DB) *TagRepo {
 	return &TagRepo{db: db}
 }
 
-func (r *TagRepo) GetTagsByFilter(ctx context.Context, filter repo.TagFilter) ([]*model.Tag, error) {
+type TagFilter struct {
+	StatusID int32
+}
+
+func (r *TagRepo) GetTagsByFilter(ctx context.Context, filter TagFilter) ([]*model.Tag, error) {
 	tagQuery := query.Use(r.db).Tag.WithContext(ctx)
 	titleField := field.NewString(tagQuery.TableName(), "title")
 	statusField := field.NewInt32(tagQuery.TableName(), "statusId")

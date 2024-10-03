@@ -2,18 +2,24 @@ package service
 
 import (
 	"log/slog"
-	"newsportal/internal/repo"
+	"newsportal/internal/repo/gormdb"
 )
 
 type NewsPortal struct {
-	NewsRepo     repo.NewsRepo
-	CategoryRepo repo.CategoryRepo
-	TagRepo      repo.TagRepo
+	NewsRepo     *gormdb.NewsRepo
+	CategoryRepo *gormdb.CategoryRepo
+	TagRepo      *gormdb.TagRepo
 	log          slog.Logger
 }
 
+type Repositories struct {
+	NewsRepo     *gormdb.NewsRepo
+	CategoryRepo *gormdb.CategoryRepo
+	TagRepo      *gormdb.TagRepo
+}
+
 // Конструктор для создания сервиса
-func NewNewsPortal(repos repo.Repositories, logger slog.Logger) *NewsPortal {
+func NewNewsPortal(repos Repositories, logger slog.Logger) *NewsPortal {
 	return &NewsPortal{
 		NewsRepo:     repos.NewsRepo,
 		CategoryRepo: repos.CategoryRepo,

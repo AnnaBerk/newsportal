@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"newsportal/internal/repo"
+	"newsportal/internal/repo/gormdb"
 )
 
 type CategoryDTO struct {
@@ -22,7 +22,7 @@ func (s *NewsPortal) GetCategoriesByFilter(ctx context.Context, filter CategoryF
 	//	filter.StatusID = 1
 	//}
 
-	categories, err := s.CategoryRepo.GetCategoriesByFilter(ctx, repo.CategoryFilter{
+	categories, err := s.CategoryRepo.GetCategoriesByFilter(ctx, gormdb.CategoryFilter{
 		StatusID: filter.StatusID,
 	})
 	if err != nil {

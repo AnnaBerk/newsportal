@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm/logger"
 	"log/slog"
 	v1 "newsportal/internal/controller/http/v1"
-	"newsportal/internal/repo"
 	"newsportal/internal/repo/gormdb"
 	"newsportal/internal/service"
 	"newsportal/pkg/httpserver"
@@ -53,7 +52,7 @@ func Run() {
 
 	// Initialize repositories
 	log.Info("Initializing repositories...")
-	repositories := repo.Repositories{
+	repositories := service.Repositories{
 		CategoryRepo: gormdb.NewCategoryRepo(db),
 		TagRepo:      gormdb.NewTagRepo(db),
 		NewsRepo:     gormdb.NewNewsRepo(db),
